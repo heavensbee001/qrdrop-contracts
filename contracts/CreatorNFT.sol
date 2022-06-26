@@ -11,17 +11,24 @@ import { Base64 } from "./libraries/Base64.sol";
 // to the inherited contract's methods.
 contract CreatorNFT is ERC721URIStorage {
 
+  mapping(uint256 => bool) private _tokenActive;
+
   event CreatorNFTMinted(address sender, uint256 tokenId);
+  event TokenActiveUpdated(uint256 tokenId, bool active);
 
   // We need to pass the name of our NFTs token and it's symbol.
-  constructor(string memory _name, string memory _symbol) ERC721 (_name, _symbol) {
+  constructor() ERC721 ("Poap Creator NFT", "PCN") {
     console.log("initializing NFT Contract");
   }
 
   // A function our user will hit to get their NFT.
-  function makeACreatorNFT() public {
+  function makeACreatorNFT(
+    string memory name,
+    string memory description,
+    string memory imageUri
+  ) public {
      // Get the id of the name
-     uint256 newItemId = uint256(keccak256(abi.encodePacked(name())));
+     uint256 newItemId = uint256(keccak256(abi.encodePacked(name)));
 
      // Actually mint the NFT to the sender using msg.sender.
     _safeMint(msg.sender, newItemId);
@@ -30,7 +37,7 @@ contract CreatorNFT is ERC721URIStorage {
         bytes(
             string(
                 abi.encodePacked(
-                    '{"name": "", "description": "", "image": ""}'
+                    '{"name": ',name,', "description": ',description,', "image": ',imageUri,'}'
                 )
             )
         )
@@ -48,5 +55,19 @@ contract CreatorNFT is ERC721URIStorage {
     console.log("An NFT w/ ID %s has been minted to %s", newItemId, msg.sender);
 
     emit CreatorNFTMinted(msg.sender, newItemId);
+
+    setActive(newItemId, true);
+  }
+
+  // set token as active to enable PoapNFTs minting
+  function setActive(uint256 id, bool isActive) public {
+    require(_exists(id), "CreatorNFT: Token does not exist");
+    _tokenActive[id] = isActive;
+    emit TokenActiveUpdated(id, _tokenActive[id]);
+  }
+
+  function active(uint256 id) public view returns (bool) {
+    require(_exists(id), "CreatorNFT: Token does not exist");
+    return _tokenActive[id];
   }
 }
