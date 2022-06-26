@@ -3,13 +3,14 @@ pragma solidity ^0.8.0;
 
 // We first import some OpenZeppelin Contracts.
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 import "hardhat/console.sol";
 import { Base64 } from "./libraries/Base64.sol";
 
 // We inherit the contract we imported. This means we'll have access
 // to the inherited contract's methods.
-contract CreatorNFT is ERC721URIStorage {
+contract CreatorNFT is ERC721URIStorage, Ownable {
 
   mapping(uint256 => bool) private _tokenActive;
 
@@ -60,7 +61,7 @@ contract CreatorNFT is ERC721URIStorage {
   }
 
   // set token as active to enable PoapNFTs minting
-  function setActive(uint256 id, bool isActive) public {
+  function setActive(uint256 id, bool isActive) public onlyOwner {
     require(_exists(id), "CreatorNFT: Token does not exist");
     _tokenActive[id] = isActive;
     emit TokenActiveUpdated(id, _tokenActive[id]);
