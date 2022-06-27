@@ -31,8 +31,8 @@ contract CreatorNFT is ERC721URIStorage, Ownable {
      // Get the id of the name
      uint256 newItemId = uint256(keccak256(abi.encodePacked(name)));
 
-     // Actually mint the NFT to the sender using msg.sender.
-    _safeMint(msg.sender, newItemId);
+     // Actually mint the NFT to the sender using tx.origin.
+    _safeMint(tx.origin, newItemId);
 
     string memory json = Base64.encode(
         bytes(
@@ -53,9 +53,9 @@ contract CreatorNFT is ERC721URIStorage, Ownable {
     console.log("--------------------\n");
     // Set the NFTs data.
     _setTokenURI(newItemId, finalTokenUri);
-    console.log("An NFT w/ ID %s has been minted to %s", newItemId, msg.sender);
+    console.log("An NFT w/ ID %s has been minted to %s", newItemId, tx.origin);
 
-    emit CreatorNFTMinted(msg.sender, newItemId);
+    emit CreatorNFTMinted(tx.origin, newItemId);
 
     setActive(newItemId, true);
   }

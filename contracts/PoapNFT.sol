@@ -43,7 +43,7 @@ contract PoapNFT is ERC721URIStorage {
 
   // sender should be able to mint a Poap only if it has not a token on the same contract
   modifier uniquePerSoul () {
-    require(_ownerToTokenId[msg.sender] == 0, "This address already has a token");
+    require(_ownerToTokenId[tx.origin] == 0, "This address already has a token");
     _;
   }
 
@@ -52,18 +52,18 @@ contract PoapNFT is ERC721URIStorage {
      // Get the current tokenId, this starts at 0.
     uint256 newItemId = _tokenIds.current();
 
-     // Actually mint the NFT to the sender using msg.sender.
-    _safeMint(msg.sender, newItemId);
-    _ownerToTokenId[msg.sender] = _tokenIds.current();
+     // Actually mint the NFT to the sender using tx.origin.
+    _safeMint(tx.origin, newItemId);
+    _ownerToTokenId[tx.origin] = _tokenIds.current();
     
     // Set the NFTs data.
     _setTokenURI(newItemId, _uri);
-    console.log("An NFT w/ ID %s has been minted to %s", newItemId, msg.sender);
+    console.log("An NFT w/ ID %s has been minted to %s", newItemId, tx.origin);
 
     // Increment the counter for when the next NFT is minted.
     _tokenIds.increment();
 
-    emit NewPoapNFTMinted(msg.sender, newItemId);
+    emit NewPoapNFTMinted(tx.origin, newItemId);
   }
 
   // revert all transfer methods to make tokens soulbound
