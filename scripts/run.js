@@ -33,11 +33,20 @@ const createPoapNftContract = async () => {
     await nftContract.deployed();
     console.log("Contract deployed to:", nftContract.address);
 
-    // Call the function.
+    // Make a poap nft
     let txn = await nftContract.makeAPoapNFT();
     // Wait for it to be mined.
     await txn.wait();
 
+    txn = await nftContract.getOwnerTokenId(txn.from);
+    console.log(txn);
+
+    // Try to make a poap nft with same address
+    txn = await nftContract.makeAPoapNFT();
+    // Wait for it to be mined.
+    await txn.wait();
+
+    // try to transfer a token
     txn = await nftContract["safeTransferFrom()"]();
     await txn.wait();
 };
