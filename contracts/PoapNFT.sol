@@ -63,6 +63,7 @@ contract PoapNFT is ERC721URIStorage {
     emit NewPoapNFTMinted(msg.sender, newItemId);
   }
 
+  // revert all transfer methods to make tokens soulbound
   function transferFrom() public pure {
     revert('This token is not transferable');
   }
@@ -74,5 +75,9 @@ contract PoapNFT is ERC721URIStorage {
   }
   function getApproved() public pure {
     revert('This token is not transferable'); 
+  }
+
+  function getTokensNumber() public view returns(uint256) {
+    return _tokenIds.current();
   }
 }
