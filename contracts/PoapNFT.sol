@@ -41,13 +41,20 @@ contract PoapNFT is ERC721URIStorage {
     
   }
 
+  // sender should be able to mint a Poap only if it has not a token on the same contract
+  modifier uniquePerSoul () {
+    require(_ownerToTokenId[msg.sender] == 0, "This address already has a token");
+    _;
+  }
+
   // A function our user will hit to get their NFT.
-  function makeAPoapNFT() public {
+  function makeAPoapNFT() public uniquePerSoul {
      // Get the current tokenId, this starts at 0.
     uint256 newItemId = _tokenIds.current();
 
      // Actually mint the NFT to the sender using msg.sender.
     _safeMint(msg.sender, newItemId);
+    _ownerToTokenId[msg.sender] = _tokenIds.current();
 
     console.log("\n--------------------");
     console.log(string(abi.encodePacked("https://nftpreview.0xdev.codes/?code=", _uri)));
@@ -79,5 +86,9 @@ contract PoapNFT is ERC721URIStorage {
 
   function getTokensNumber() public view returns(uint256) {
     return _tokenIds.current();
+  }
+
+  function getOwnerTokenId(address owner) public view returns(uint256) {
+    return _ownerToTokenId[owner];
   }
 }
