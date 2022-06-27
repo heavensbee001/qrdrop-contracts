@@ -55,10 +55,6 @@ contract PoapNFT is ERC721URIStorage {
      // Actually mint the NFT to the sender using msg.sender.
     _safeMint(msg.sender, newItemId);
     _ownerToTokenId[msg.sender] = _tokenIds.current();
-
-    console.log("\n--------------------");
-    console.log(string(abi.encodePacked("https://nftpreview.0xdev.codes/?code=", _uri)));
-    console.log("--------------------\n");
     
     // Set the NFTs data.
     _setTokenURI(newItemId, _uri);
