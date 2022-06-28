@@ -3,18 +3,17 @@ pragma solidity ^0.8.0;
 
 // We first import some OpenZeppelin Contracts.
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "hardhat/console.sol";
 import { Base64 } from "./libraries/Base64.sol";
 
 // We inherit the contract we imported. This means we'll have access
 // to the inherited contract's methods.
-contract CreatorNFT is ERC721URIStorage, Ownable {
+contract CreatorNFT is ERC721URIStorage {
 
   mapping(uint256 => bool) private _tokenActive;
 
-  event CreatorNFTMinted(address sender, uint256 tokenId);
+  event NewCreatorNFTMinted(address sender, uint256 tokenId);
   event TokenActiveUpdated(uint256 tokenId, bool active);
 
   // We need to pass the name of our NFTs token and it's symbol.
@@ -27,7 +26,7 @@ contract CreatorNFT is ERC721URIStorage, Ownable {
     string memory name,
     string memory description,
     string memory imageUri
-  ) public {
+  ) public returns(uint256) {
      // Get the id of the name
      uint256 newItemId = uint256(keccak256(abi.encodePacked(name)));
 
@@ -55,20 +54,25 @@ contract CreatorNFT is ERC721URIStorage, Ownable {
     _setTokenURI(newItemId, finalTokenUri);
     console.log("An NFT w/ ID %s has been minted to %s", newItemId, tx.origin);
 
-    emit CreatorNFTMinted(tx.origin, newItemId);
+    emit NewCreatorNFTMinted(tx.origin, newItemId);
 
     setActive(newItemId, true);
+
+    return newItemId;
   }
 
   // set token as active to enable PoapNFTs minting
-  function setActive(uint256 id, bool isActive) public onlyOwner {
+  function setActive(uint256 id, bool isActive) public {
+    require(ownerOf(id) == tx.origin, "CreatorNFT: Address is not the owner of the token");
     require(_exists(id), "CreatorNFT: Token does not exist");
+
     _tokenActive[id] = isActive;
     emit TokenActiveUpdated(id, _tokenActive[id]);
   }
 
   function active(uint256 id) public view returns (bool) {
     require(_exists(id), "CreatorNFT: Token does not exist");
+    
     return _tokenActive[id];
   }
 }
