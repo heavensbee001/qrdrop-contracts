@@ -3,20 +3,19 @@ pragma solidity ^0.8.0;
 
 // We first import some OpenZeppelin Contracts.
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "hardhat/console.sol";
 import { Base64 } from "./libraries/Base64.sol";
 
-// We inherit the contract we imported. This means we'll have access
-// to the inherited contract's methods.
-contract CreatorNFT is ERC721URIStorage {
+contract CreatorNFT is ERC721URIStorage, Ownable {
+  // Ownable owner will be the Factory Contract
 
   mapping(uint256 => bool) private _tokenActive;
 
   event NewCreatorNFTMinted(address sender, uint256 tokenId);
   event TokenActiveUpdated(uint256 tokenId, bool active);
 
-  // We need to pass the name of our NFTs token and it's symbol.
   constructor() ERC721 ("Poap Creator NFT", "PCN") {
     console.log("initializing NFT Contract");
   }
@@ -26,7 +25,7 @@ contract CreatorNFT is ERC721URIStorage {
     string memory name,
     string memory description,
     string memory imageUri
-  ) public returns(uint256) {
+  ) public onlyOwner returns(uint256) {
      // Get the id of the name
      uint256 newItemId = uint256(keccak256(abi.encodePacked(name)));
 
@@ -62,7 +61,7 @@ contract CreatorNFT is ERC721URIStorage {
   }
 
   // set token as active to enable PoapNFTs minting
-  function setActive(uint256 id, bool isActive) public {
+  function setActive(uint256 id, bool isActive) public onlyOwner {
     require(ownerOf(id) == tx.origin, "CreatorNFT: Address is not the owner of the token");
     require(_exists(id), "CreatorNFT: Token does not exist");
 
@@ -72,7 +71,7 @@ contract CreatorNFT is ERC721URIStorage {
 
   function active(uint256 id) public view returns (bool) {
     require(_exists(id), "CreatorNFT: Token does not exist");
-    
+
     return _tokenActive[id];
   }
 }

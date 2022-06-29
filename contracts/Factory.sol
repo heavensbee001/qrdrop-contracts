@@ -14,6 +14,7 @@ contract Factory {
     CreatorNFT private _creatorNFTContract;
 
     mapping (uint256 => PoapNFT) public collections; //a mapping that contains different ERC721 collection contracts deployed
+    mapping (address => uint256[]) public ownerToCreatorNFTId; //a mapping that contains different ERC721 collection contracts deployed
 
     constructor () {
       _deployCreatorNFT();
@@ -23,9 +24,10 @@ contract Factory {
       _creatorNFTContract = new CreatorNFT();
     }
 
-    function createCreatorNFT(string memory _name, string memory _symbol, string memory _description, string memory _imageUri) public {
+    function createCreatorNFT(string memory _name, string memory _symbol, string memory _description, string memory _imageUri) public returns(uint256){
       uint256 _id = _creatorNFTContract.makeACreatorNFT(_name, _description, _imageUri);
-      _deployPoapNFT(_id, _name, _symbol, _description, _imageUri);
+      ownerToCreatorNFTId[msg.sender].push(_id);
+      _deployPoapNFT(_id, _name, _symbol, _description, _imageUri);      
     }
     
     function setCreatorNFTActive(uint256 _id, bool _isActive) public {
@@ -43,8 +45,13 @@ contract Factory {
         return address(poapContract);
     }
 
-    function mintERC721(uint _id) public {
+    function makeAPoapNFT(uint _id) public {
+      require(address(collections[_id]) != address(0), "There's no NFT collection with this id");
       collections[_id].makeAPoapNFT();
+    }
+    
+    function getAddressCreatorNFTs(address owner) public view returns(uint256[] memory) {
+      return ownerToCreatorNFTId[owner];
     }
 
     // /*

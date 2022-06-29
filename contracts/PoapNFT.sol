@@ -4,12 +4,13 @@ pragma solidity ^0.8.0;
 // We first import some OpenZeppelin Contracts.
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 import { Base64 } from "./libraries/Base64.sol";
 
 // We inherit the contract we imported. This means we'll have access
 // to the inherited contract's methods.
-contract PoapNFT is ERC721URIStorage {
+contract PoapNFT is ERC721URIStorage, Ownable {
   // Magic given to us by OpenZeppelin to help us keep track of tokenIds.
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
@@ -49,7 +50,7 @@ contract PoapNFT is ERC721URIStorage {
   }
 
   // A function our user will hit to get their NFT.
-  function makeAPoapNFT() public uniquePerSoul {
+  function makeAPoapNFT() public onlyOwner uniquePerSoul {
      // Get the current tokenId, this starts at 0.
     uint256 newItemId = _tokenIds.current();
 
