@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 // We first import some OpenZeppelin Contracts.
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "hardhat/console.sol";
@@ -16,6 +17,9 @@ contract Factory {
     mapping (uint256 => PoapNFT) public collections; //a mapping that contains different ERC721 collection contracts deployed
     mapping (address => uint256[]) public ownerToCreatorNFTId; //a mapping that contains different ERC721 collection contracts deployed
 
+    event NewCreatorNFTMinted(address sender, uint256 tokenId);
+    event NewBadgeNFTMinted(address sender, uint256 tokenId);
+
     constructor () {
       _deployCreatorNFT();
     }
@@ -24,18 +28,32 @@ contract Factory {
       _creatorNFTContract = new CreatorNFT();
     }
 
-    function createCreatorNFT(string memory _name, string memory _symbol, string memory _description, string memory _imageUri) public returns(uint256){
+    function createCreatorNFT(string memory _name, string memory _symbol, string memory _description, string memory _imageUri) public{
       uint256 _id = _creatorNFTContract.makeACreatorNFT(_name, _description, _imageUri);
       ownerToCreatorNFTId[msg.sender].push(_id);
-      _deployPoapNFT(_id, _name, _symbol, _description, _imageUri);      
+      _deployPoapNFT(_id, _name, _symbol, _description, _imageUri); 
+
+      emit NewCreatorNFTMinted(tx.origin, _id);
     }
     
     function setCreatorNFTActive(uint256 _id, bool _isActive) public {
       _creatorNFTContract.setActive(_id, _isActive);
     }
     
-    function getCreatorNFTActive(uint256 _id) public view {
-      _creatorNFTContract.active(_id);
+    function getCreatorNFT(uint256 _id) public view returns(string memory){
+      return _creatorNFTContract.tokenURI(_id);
+    }
+
+    function getCreatorNFTActive(uint256 _id) public view returns(bool){
+      return _creatorNFTContract.active(_id);
+    }
+
+    function getAddressCreatorNFTs(address owner) public view returns(uint256[] memory) {
+      return ownerToCreatorNFTId[owner];
+    }
+
+    function isCreator(uint256 _id, address _address) public view returns(bool) {
+      return _creatorNFTContract.ownerOf(_id) == _address;
     }
     
     function _deployPoapNFT(uint _id, string memory _contractName, string memory _symbol, string memory _description, string memory _imageUri) private returns (address) {
@@ -49,42 +67,12 @@ contract Factory {
       require(address(collections[_id]) != address(0), "There's no NFT collection with this id");
       collections[_id].makeAPoapNFT();
     }
-    
-    function getAddressCreatorNFTs(address owner) public view returns(uint256[] memory) {
-      return ownerToCreatorNFTId[owner];
+
+    function getCollection(uint256 _id) public view returns(PoapNFT) {
+      return collections[_id];
     }
 
-    // /*
-    // Helper functions below retrieve contract data given an ID or name and index in the tokens array.
-    // */
-    // function getCountERC721byIndex(uint256 _index, uint256 _id) public view returns (uint amount) {
-    //     return tokens[_index].balanceOf(indexToOwner[_index], _id);
-    // }
-
-    // function getCountERC721byName(uint256 _index, string calldata _name) public view returns (uint amount) {
-    //     uint id = getIdByName(_index, _name);
-    //     return tokens[_index].balanceOf(indexToOwner[_index], id);
-    // }
-
-    // function getIdByName(uint _index, string memory _name) public view returns (uint) {
-    //     return tokens[_index].nameToId(_name);
-    // }
-
-    // function getNameById(uint _index, uint _id) public view returns (string memory) {
-    //     return tokens[_index].idToName(_id);
-    // }
-
-    // function getERC721byIndexAndId(uint _index, uint _id)
-    //     public
-    //     view
-    //     returns (
-    //         address _contract,
-    //         address _owner,
-    //         string memory _uri,
-    //         uint supply
-    //     )
-    // {
-    //     ERC721Token token = tokens[_index];
-    //     return (address(token), token.owner(), token.uri(_id), token.balanceOf(indexToOwner[_index], _id));
-    // }
+    function getAddressNFTInCollection(uint256 _id, address _address) public view returns(uint256) {
+      return getCollection(_id).getOwnerTokenId(_address);
+    }
 }

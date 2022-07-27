@@ -36,7 +36,7 @@ contract CreatorNFT is ERC721URIStorage, Ownable {
         bytes(
             string(
                 abi.encodePacked(
-                    '{"name": ',name,', "description": ',description,', "image": ',imageUri,'}'
+                    '{"name": "',name,'", "description": "',description,'", "image": "',imageUri,'"}'
                 )
             )
         )
