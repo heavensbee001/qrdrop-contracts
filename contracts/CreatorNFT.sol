@@ -16,7 +16,7 @@ contract CreatorNFT is ERC721URIStorage, Ownable {
   event NewCreatorNFTMinted(address sender, uint256 tokenId);
   event TokenActiveUpdated(uint256 tokenId, bool active);
 
-  constructor() ERC721 ("Poap Creator NFT", "PCN") {
+  constructor() ERC721 ("Badge Creator NFT", "PCN") {
     console.log("initializing NFT Contract");
   }
 
@@ -60,7 +60,7 @@ contract CreatorNFT is ERC721URIStorage, Ownable {
     return newItemId;
   }
 
-  // set token as active to enable PoapNFTs minting
+  // set token as active to enable BadgeNFTs minting
   function setActive(uint256 id, bool isActive) public onlyOwner {
     require(ownerOf(id) == tx.origin, "CreatorNFT: Address is not the owner of the token");
     require(_exists(id), "CreatorNFT: Token does not exist");

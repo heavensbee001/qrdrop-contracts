@@ -10,7 +10,7 @@ import { Base64 } from "./libraries/Base64.sol";
 
 // We inherit the contract we imported. This means we'll have access
 // to the inherited contract's methods.
-contract PoapNFT is ERC721URIStorage, Ownable {
+contract BadgeNFT is ERC721URIStorage, Ownable {
   // Magic given to us by OpenZeppelin to help us keep track of tokenIds.
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
@@ -19,14 +19,14 @@ contract PoapNFT is ERC721URIStorage, Ownable {
 
   mapping (address=>uint) private _ownerToTokenId;
 
-  event NewPoapNFTMinted(address sender, uint256 tokenId);
+  event NewBadgeNFTMinted(address sender, uint256 tokenId);
 
   // We need to pass the name of our NFTs token and it's symbol.
   constructor(string memory _name, string memory _symbol, string memory _description, string memory _imageUri) ERC721 (_name, _symbol) {
-    console.log("initializing Poap NFT Contract");
+    console.log("initializing Badge NFT Contract");
     _tokenIds.increment();
 
-    // store Poap uri 
+    // store Badge uri 
     string memory json = Base64.encode(
         bytes(
             string(
@@ -43,14 +43,14 @@ contract PoapNFT is ERC721URIStorage, Ownable {
     
   }
 
-  // sender should be able to mint a Poap only if it has not a token on the same contract
+  // sender should be able to mint a Badge only if it has not a token on the same contract
   modifier uniquePerSoul () {
     require(_ownerToTokenId[tx.origin] == 0, "This address already has a token");
     _;
   }
 
   // A function our user will hit to get their NFT.
-  function makeAPoapNFT() public onlyOwner uniquePerSoul {
+  function makeABadgeNFT() public onlyOwner uniquePerSoul {
      // Get the current tokenId, this starts at 0.
     uint256 newItemId = _tokenIds.current();
 
@@ -65,7 +65,7 @@ contract PoapNFT is ERC721URIStorage, Ownable {
     // Increment the counter for when the next NFT is minted.
     _tokenIds.increment();
 
-    emit NewPoapNFTMinted(tx.origin, newItemId);
+    emit NewBadgeNFTMinted(tx.origin, newItemId);
   }
 
   // revert all transfer methods to make tokens soulbound
